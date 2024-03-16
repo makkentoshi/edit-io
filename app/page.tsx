@@ -9,9 +9,12 @@ import { ActiveElement, CustomFabricObject } from "@/types/type";
 import { fabric } from "fabric";
 import {
   handleCanvasMouseDown,
+  handleCanvasMouseMove,
+  handleCanvasMouseUp,
   handleResize,
   initializeFabric,
 } from "@/lib/canvas";
+import { useMutation, useStorage } from "@/liveblocks.config";
 
 export default function Page() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -19,6 +22,24 @@ export default function Page() {
   const isDrawing = useRef(false);
   const shapeRef = useRef<fabric.Object | null>(null);
   const selectedShapeRef = useRef<string | null>(null);
+
+  const canvasObjects = useStorage((root) => root.canvasObjects);
+
+  const activeObjectRef = useRef<fabric.Object | null>(null);
+
+  const syncShapeInStorage = useMutation(({ storage }, object) => {
+    if (!object) return;
+
+    const { objectId } = object;
+
+    const shapeData = object.toJSON();
+
+    shapeData.objectId = objectId;
+
+    const canvasObjects = storage.get("canvasObjects");
+
+    canvasObjects.set(objectId, shapeData);
+  }, []);
 
   const [activeElement, setActiveElement] = useState<ActiveElement>({
     name: "",
@@ -42,6 +63,29 @@ export default function Page() {
         isDrawing,
         shapeRef,
         selectedShapeRef,
+      });
+    });
+
+    canvas.on("mouse:move", (options) => {
+      handleCanvasMouseMove({
+        options,
+        canvas,
+        isDrawing,
+        shapeRef,
+        selectedShapeRef,
+        syncShapeInStorage,
+      });
+    });
+
+    canvas.on("mouse:up", (options) => {
+      handleCanvasMouseUp({
+        canvas,
+        isDrawing,
+        shapeRef,
+        selectedShapeRef,
+        syncShapeInStorage,
+        setActiveElement,
+        activeObjectRef,
       });
     });
 
