@@ -4,25 +4,60 @@ import { Room } from "./Room";
 import Navbar from "@/components/Navbar";
 import LeftSidebar from "@/components/LeftSidebar";
 import RightSidebar from "@/components/RightSidebar";
-import { useEffect, useRef } from "react";
-import { CustomFabricObject } from "@/types/type";
+import { useEffect, useRef, useState } from "react";
+import { ActiveElement, CustomFabricObject } from "@/types/type";
 import { fabric } from "fabric";
-// import { initializeFabric } from "@/lib/canvas";
+import {
+  handleCanvasMouseDown,
+  handleResize,
+  initializeFabric,
+} from "@/lib/canvas";
 
 export default function Page() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricRef = useRef<fabric.Canvas | null>(null);
   const isDrawing = useRef(false);
+  const shapeRef = useRef<fabric.Object | null>(null);
+  const selectedShapeRef = useRef<string | null>(null);
 
-  // useEffect(() => {
-  //   const canvas = initializeFabric({ canvasRef, fabricRef });
-  // }, []);
+  const [activeElement, setActiveElement] = useState<ActiveElement>({
+    name: "",
+    value: "",
+    icon: "",
+  });
+
+  const handleActiveElement = (elem: ActiveElement) => {
+    setActiveElement(elem);
+
+    selectedShapeRef.current = elem?.value as string;
+  };
+
+  useEffect(() => {
+    const canvas = initializeFabric({ canvasRef, fabricRef });
+
+    canvas.on("mouse:down", (options) => {
+      handleCanvasMouseDown({
+        options,
+        canvas,
+        isDrawing,
+        shapeRef,
+        selectedShapeRef,
+      });
+    });
+
+    window.addEventListener("resize", () => {
+      handleResize({ fabricRef });
+    });
+  }, []);
   return (
     <main className="h-screen overflow-hidden">
-      <Navbar></Navbar>
+      <Navbar
+        activeElement={activeElement}
+        handleActiveElement={handleActiveElement}
+      ></Navbar>
       <section className="flex h-full flex-row">
         <LeftSidebar></LeftSidebar>
-        <Live></Live>
+        <Live canvasRef={canvasRef}></Live>
         <RightSidebar></RightSidebar>
       </section>
     </main>
