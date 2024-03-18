@@ -108,8 +108,8 @@ export const handleKeyDown = ({
   //   handleDelete(canvas, deleteShapeFromStorage);
   // }
 
-  // check if the key pressed is ctrl/cmd + x (cut)
-  if ((e?.ctrlKey || e?.metaKey) && e.keyCode === 88) {
+  // check if the key pressed is ctrl/cmd + y (cut)
+  if ((e?.ctrlKey || e?.metaKey) && e.keyCode === 89) {
     handleCopy(canvas);
     handleDelete(canvas, deleteShapeFromStorage);
   }
@@ -119,8 +119,8 @@ export const handleKeyDown = ({
     undo();
   }
 
-  // check if the key pressed is ctrl/cmd + y (redo)
-  if ((e?.ctrlKey || e?.metaKey) && e.keyCode === 89) {
+  // check if the key pressed is ctrl/cmd + x (redo)
+  if ((e?.ctrlKey || e?.metaKey) && e.keyCode === 88) {
     redo();
   }
 
