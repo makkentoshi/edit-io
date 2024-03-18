@@ -5,13 +5,14 @@ import Navbar from "@/components/Navbar";
 import LeftSidebar from "@/components/LeftSidebar";
 import RightSidebar from "@/components/RightSidebar";
 import { useEffect, useRef, useState } from "react";
-import { ActiveElement, CustomFabricObject } from "@/types/type";
+import { ActiveElement, Attributes, CustomFabricObject } from "@/types/type";
 import { fabric } from "fabric";
 import {
   handleCanvasMouseDown,
   handleCanvasMouseMove,
   handleCanvasMouseUp,
   handleCanvasObjectModified,
+  handleCanvasSelectionCreated,
   handleResize,
   initializeFabric,
   renderCanvas,
@@ -36,6 +37,18 @@ export default function Page() {
   const canvasObjects = useStorage((root) => root.canvasObjects);
 
   const activeObjectRef = useRef<fabric.Object | null>(null);
+
+  const isEditingRef = useRef(false);
+
+  const [elementAttributes, setElementAttributes] = useState<Attributes>({
+    width: "",
+    height: "",
+    fontSize: "",
+    fontFamily: "",
+    fontWeight: "",
+    fill: "#aabbcc",
+    stroke: "#aabbcc",
+  });
 
   const syncShapeInStorage = useMutation(({ storage }, object) => {
     if (!object) return;
@@ -149,6 +162,14 @@ export default function Page() {
       });
     });
 
+    canvas.on("selection:created", (options: any) => {
+      handleCanvasSelectionCreated({
+        options,
+        isEditingRef,
+        setElementAttributes,
+      });
+    });
+
     window.addEventListener("resize", () => {
       handleResize({ fabricRef });
     });
@@ -186,14 +207,21 @@ export default function Page() {
             file: e.target.files[0],
             canvas: fabricRef as any,
             shapeRef,
-            syncShapeInStorage
+            syncShapeInStorage,
           });
         }}
       ></Navbar>
       <section className="flex h-full flex-row">
         <LeftSidebar allShapes={Array.from(canvasObjects)}></LeftSidebar>
         <Live canvasRef={canvasRef}></Live>
-        <RightSidebar></RightSidebar>
+        <RightSidebar
+          elementAttributes={elementAttributes}
+          setElementAttributes={setElementAttributes}
+          fabricRef={fabricRef}
+          isEditingRef={isEditingRef}
+          activeObjectRef={activeObjectRef}
+          syncShapeInStorage={syncShapeInStorage}
+        ></RightSidebar>
       </section>
     </main>
   );

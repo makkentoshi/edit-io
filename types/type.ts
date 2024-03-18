@@ -97,6 +97,7 @@ export type RightSidebarProps = {
   activeObjectRef: React.RefObject<fabric.Object | null>;
   isEditingRef: React.MutableRefObject<boolean>;
   syncShapeInStorage: (obj: any) => void;
+  isEditingRef: React.MutableRefObject<boolean>;
 };
 
 export type NavbarProps = {
@@ -170,6 +171,7 @@ export type CanvasSelectionCreated = {
 export type CanvasObjectScaling = {
   options: fabric.IEvent;
   setElementAttributes: React.Dispatch<React.SetStateAction<Attributes>>;
+  isEditingRef: React.MutableRefObject<boolean>;
 };
 
 export type RenderCanvas = {
